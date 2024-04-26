@@ -57,25 +57,6 @@ async function addContact({ name, email, phone }) {
   return newContact;
 }
 
-// async function changeContact(id, newContactInfo) {
-//   // Повертає оновлений об'єкт доданого контакту (з id).
-//   const contacts = await listContacts();
-//   const contactIndex = contacts.findIndex(el => el.id === id);
-
-//   if (contactIndex === -1) {
-//     return null;
-//   }
-
-//   const newContact = {
-//     ...contacts[contactIndex],
-//     ...newContactInfo,
-//   }
-//   const newContactList = [...contacts.slice(0, contactIndex), newContact, ...contacts.slice(contactIndex+1)]
-  
-//   await writeFile(contactsPath, newContactList);
-//   return newContact;
-// }
-
 async function changeContact(id, newContactInfo) {
   const contacts = await listContacts();
   const contactIndex = contacts.findIndex((el) => el.id === id);
