@@ -2,19 +2,25 @@ import Joi from "joi";
 
 const contactSchema = Joi.object({
   name: Joi.string().required().min(2).max(20),
-  email: Joi.string().email().required(),
+  email: Joi.string().email(),
   phone: Joi.string()
-    .length(10)
-    .pattern(/[6-9]{1}[0-9]{9}/)
-    .required(),
-});
+    .pattern(/^\(\d{3}\) \d{3}-\d{4}$/),
+  favorite: Joi.boolean(),
+  },
+);
 
 const contactSchema2 = Joi.object({
   name: Joi.string().min(2).max(20),
   email: Joi.string().email(),
   phone: Joi.string()
-    .length(10)
-    .pattern(/[6-9]{1}[0-9]{9}/),
-});
+    .pattern(/^\(\d{3}\) \d{3}-\d{4}$/),
+  favorite: Joi.boolean(),
+  },
+);
 
-export { contactSchema, contactSchema2 };
+const contactSchema3 = Joi.object({
+    favorite: Joi.boolean().required(),
+  },
+);
+
+export { contactSchema, contactSchema2, contactSchema3 };

@@ -1,8 +1,8 @@
-import { contactsService } from "../services/contactsServices.js";
+import Contact from "../models/contact.js";
 
 export const getAllContacts = async (req, res) => {
     try {
-        const contacts = await contactsService.listContacts();
+        const contacts = await Contact.find();
         res.status(200).json(contacts);
     }
     catch (error) {
@@ -12,16 +12,18 @@ export const getAllContacts = async (req, res) => {
     }
 };
 
-export const getOneContact = async (req, res) => {
+export const getOneContact = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const contact = await contactsService.getContactById(id);
-        if (contact) {
-            return res.status(200).json(contact);
+        const contact = await Contact.findById(id);
+        
+        if (contact===null) {
+            res.status(404).json({
+                "message": "Not found"
+            })           
         }
-        res.status(404).json({
-            "message": "Not found"
-        })
+        return res.status(200).json(contact);
+       
     }
     catch (error) {
         res.status(500).json({
@@ -33,13 +35,16 @@ export const getOneContact = async (req, res) => {
 export const deleteContact = async (req, res) => {
     try {
         const { id } = req.params;
-        const deletedContact = await contactsService.getContactById(id);
-        if (deletedContact) {
-            return res.status(200).json(deletedContact);
+        const deletedContact = await Contact.findByIdAndDelete(id);
+        if (deletedContact === null) {
+                res.status(404).json({
+                    "message": "Not found"
+                }
+            )
         }
-        res.status(404).json({
-            "message": "Not found"
-        })
+        
+        res.status(200).json(deletedContact);
+       
     }
     catch (error) {
         res.status(500).json({
@@ -50,11 +55,14 @@ export const deleteContact = async (req, res) => {
 
 export const createContact = async (req, res) => {
     try {
-        const newContact = await contactsService.addContact({
+        const contact = {
             name: req.body.name,
             email: req.body.email,
-            phone: req.body.phone
-        });
+            phone: req.body.phone,
+            favorite: req.body.favorite
+        };
+
+        const newContact = await Contact.create(contact);
 
         res.status(201).json(newContact);
     }
@@ -77,15 +85,16 @@ export const updateContact = async(req, res) => {
         const newContactInfo = {
             ...req.body
         }
-        const updatedContact = await contactsService.changeContact(id, newContactInfo);
+        const updatedContact = await Contact.findByIdAndUpdate(id, newContactInfo, {new:true});
 
-        if (updatedContact) {
-            return res.status(200).json(updatedContact);
+        if (updatedContact === null) {
+            res.status(404).json({
+                "message": "Not found"
+            }
+            );   
         }
-
-        res.status(404).json({
-            "message": "Not found"
-        });
+        res.status(200).json(updatedContact);
+        
     }
     catch (error) {
         res.status(500).json({
@@ -93,3 +102,28 @@ export const updateContact = async(req, res) => {
         });
     }
 };
+
+export const updateStatusContact = async(req, res) => {
+    try {
+        const { id } = req.params;
+
+        const newContactInfo = {
+            ...req.body
+        }
+        const updatedContact = await Contact.findByIdAndUpdate(id, newContactInfo, {new:true});
+
+        if (updatedContact === null) {
+            res.status(404).json({
+                "message": "Not found"
+            }
+            );   
+        }
+        res.status(200).json(updatedContact);
+        
+    }
+    catch (error) {
+        res.status(500).json({
+            message: 'Internal Server Error',
+        });
+    }
+}
