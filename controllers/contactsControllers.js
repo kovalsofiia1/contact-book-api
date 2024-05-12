@@ -51,8 +51,8 @@ export const getOneContact = async (req, res, next) => {
 export const deleteContact = async (req, res) => {
     try {
         const { id } = req.params;
-        const deletedContact = await Contact.findByIdAndDelete(id);
-        if (deletedContact === null || deletedContact.owner.toString()!==req.user.id) {
+        const deletedContact = await Contact.findOneAndDelete({_id: id, owner: req.user.id});
+        if (deletedContact === null) {
                 return res.status(404).json({
                     "message": "Not found"
                 }
@@ -108,9 +108,9 @@ export const updateContact = async(req, res) => {
         const newContactInfo = {
             ...req.body
         }
-        const updatedContact = await Contact.findByIdAndUpdate(id, newContactInfo, {new:true});
+        const updatedContact = await Contact.findOneAndUpdate({ _id: id, owner: req.user.id }, newContactInfo, { new: true });
 
-        if (updatedContact === null || updatedContact.owner.toString()!==req.user.id) {
+        if (updatedContact === null) {
             return res.status(404).json({
                 "message": "Not found"
             }
@@ -133,9 +133,9 @@ export const updateStatusContact = async(req, res) => {
         const newContactInfo = {
             ...req.body
         }
-        const updatedContact = await Contact.findByIdAndUpdate(id, newContactInfo, {new:true});
+        const updatedContact = await Contact.findOneAndUpdate({ _id: id, owner: req.user.id }, newContactInfo, {new:true});
 
-        if (updatedContact === null || updatedContact.owner.toString()!==req.user.id) {
+        if (updatedContact === null ) {
             return res.status(404).json({
                 "message": "Not found"
             }

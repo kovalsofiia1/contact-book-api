@@ -17,7 +17,7 @@ router.post('/register', validateBody(registerSchema), handleRegister);
 
 router.post('/login', validateBody(registerSchema), handleLogin);
 
-router.get('/logout', auth, handleLogout);
+router.post('/logout', auth, handleLogout);
 
 router.get('/current', auth, handleGetCurrent)
 
