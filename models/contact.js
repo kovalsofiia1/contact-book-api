@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
 
 const contactSchema = new mongoose.Schema({
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'user',
+    },
+
     name: {
         type: String,
         required: [true, 'Set name for contact'],

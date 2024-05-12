@@ -1,8 +1,24 @@
 import Contact from "../models/contact.js";
 
-export const getAllContacts = async (req, res) => {
+export const getAllContacts = async (req, res, next) => {
     try {
-        const contacts = await Contact.find();
+        let { favorite, page, limit } = req.query;
+        console.log(favorite);
+
+        if (!page) {
+            page = 1;
+        }
+
+        if (!limit) {
+            limit = 10
+        }
+
+        let contacts = await Contact.find({ owner: req.user.id }).skip((page-1)*limit).limit(limit);
+        
+        if (favorite) {
+            contacts = contacts.filter(c => c.favorite.toString() === favorite);
+        }
+
         res.status(200).json(contacts);
     }
     catch (error) {
@@ -15,15 +31,15 @@ export const getAllContacts = async (req, res) => {
 export const getOneContact = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const contact = await Contact.findById(id);
+        const contact = await Contact.findOne({ _id: id, owner: req.user.id});
         
         if (contact===null) {
             return res.status(404).json({
                 "message": "Not found"
             })           
         }
+
         res.status(200).json(contact);
-       
     }
     catch (error) {
         res.status(500).json({
@@ -36,7 +52,7 @@ export const deleteContact = async (req, res) => {
     try {
         const { id } = req.params;
         const deletedContact = await Contact.findByIdAndDelete(id);
-        if (deletedContact === null) {
+        if (deletedContact === null || deletedContact.owner.toString()!==req.user.id) {
                 return res.status(404).json({
                     "message": "Not found"
                 }
@@ -59,7 +75,8 @@ export const createContact = async (req, res) => {
             name: req.body.name,
             email: req.body.email,
             phone: req.body.phone,
-            favorite: req.body.favorite
+            favorite: req.body.favorite,
+            owner: req.user.id
         };
 
         const newContact = await Contact.create(contact);
@@ -72,6 +89,7 @@ export const createContact = async (req, res) => {
         res.status(201).json(newContact);
     }
     catch (error) {
+        console.log(error);
         res.status(500).json({
             message: 'Internal Server Error',
         });
@@ -92,7 +110,7 @@ export const updateContact = async(req, res) => {
         }
         const updatedContact = await Contact.findByIdAndUpdate(id, newContactInfo, {new:true});
 
-        if (updatedContact === null) {
+        if (updatedContact === null || updatedContact.owner.toString()!==req.user.id) {
             return res.status(404).json({
                 "message": "Not found"
             }
@@ -117,7 +135,7 @@ export const updateStatusContact = async(req, res) => {
         }
         const updatedContact = await Contact.findByIdAndUpdate(id, newContactInfo, {new:true});
 
-        if (updatedContact === null) {
+        if (updatedContact === null || updatedContact.owner.toString()!==req.user.id) {
             return res.status(404).json({
                 "message": "Not found"
             }
