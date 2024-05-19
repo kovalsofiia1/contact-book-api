@@ -1,6 +1,10 @@
 import User from "../models/user.js";
 import * as bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import * as fs from "node:fs/promises";
+import path from "node:path";
+import gravatar from "gravatar";
+import Jimp from "jimp";
 
 const SECRET = process.env.SECRET;
 
@@ -26,10 +30,13 @@ export const handleRegister = async(req, res, next) => {
     try {
 
         const hashedPassword = await encryptPassword(password);
+        const avatar = gravatar.url(email);
+        console.log(avatar);
 
         const newUser = await User.create({
             email: lowerCaseEmail,
-            password: hashedPassword
+            password: hashedPassword,
+            avatarURL: avatar,
         });
 
         res.status(201).json({
@@ -148,5 +155,32 @@ export const handleSubscription = async(req, res, next) => {
     }
     catch (error) {
         next(error);
+    }
+}
+
+
+export const handleAvatarChange = async (req, res, next) => {
+    try {
+        const img = await Jimp.read(req.file.path);
+        await img.cover(250, 250).writeAsync(req.file.path);
+
+        console.log('jimp')
+        await fs.rename(req.file.path, path.resolve('public', 'avatars', req.file.filename));
+
+        const newUser = await User.findByIdAndUpdate(req.user.id, { avatarURL: `/avatars/${req.file.filename}` }, {new: true});
+        
+        console.log(newUser);
+        if (!newUser) {
+            res.status(404).json({
+                message: "User not found"
+            })
+        }
+
+        res.status(200).json({
+            avatarURL: newUser.avatarURL
+        })
+    }
+    catch (error) {
+        return next(error);
     }
 }

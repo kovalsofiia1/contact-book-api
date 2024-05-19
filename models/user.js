@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: null,
     },
-
+    avatarURL: String,
 });
 
 export default mongoose.model("user", userSchema)
