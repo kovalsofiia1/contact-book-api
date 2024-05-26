@@ -1,5 +1,5 @@
 import express from "express";
-import { registerSchema, changeUserSchema } from "../schemas/usersSchemas.js";
+import { registerSchema, changeUserSchema, emailSchema } from "../schemas/usersSchemas.js";
 import validateBody from "../helpers/validateBody.js";
 import {
     handleRegister,
@@ -7,7 +7,9 @@ import {
     handleLogout,
     handleGetCurrent,
     handleSubscription,
-    handleAvatarChange
+    handleAvatarChange,
+    handleVerify,
+    handleNewVerify
 } from "../controllers/usersControllers.js";
 
 import auth from "../middlewares/auth.js";
@@ -15,6 +17,10 @@ import upload from "../middlewares/upload.js";
 
 const router = express.Router();
 
+router.get('/verify/:verificationToken', handleVerify);
+
+router.post('/verify', validateBody(emailSchema), handleNewVerify);
+    
 router.post('/register', validateBody(registerSchema), handleRegister);
 
 router.post('/login', validateBody(registerSchema), handleLogin);
